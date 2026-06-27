@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  core:
+    name: Lint + Type + Test (no torch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install (dev, no neural)
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Type check
+        run: mypy src/pico_nlu
+
+      - name: Test (core only)
+        run: pytest -m "not neural"
+
+  neural:
+    name: Test (with torch)
+    runs-on: ubuntu-latest
+    # Skip the neural job when only non-neural files changed.
+    paths:
+      - "src/pico_nlu/neural/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - ".github/workflows/ci.yml"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install (dev + neural)
+        run: pip install -e ".[dev,neural]"
+
+      - name: Test (including neural)
+        run: pytest

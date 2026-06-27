@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pico-nlu"
+dynamic = ["version"]
+description = "A from-scratch NLU library derived from Snips NLU with simplifications and modernizations."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "pico-nlu contributors" }]
+keywords = ["nlu", "nlp", "intent", "slot-filling", "snips"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "pydantic>=2.5,<3",
+    "scikit-learn>=1.3,<2",
+    "joblib>=1.3,<2",
+    "word2number>=1.1",
+    "dateparser>=1.1,<2",
+    "regex>=2023.1", # pure-Python Unicode tokenizer
+]
+
+[project.optional-dependencies]
+neural = [
+    "torch>=2.1,<3",
+]
+transformer = [
+    "transformers>=4.36,<5", # future, PRD-11
+]
+dev = [
+    "pytest>=7",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "types-regex",
+]
+
+[project.scripts]
+pico-nlu = "pico_nlu.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/pico-nlu/pico-nlu/blob/main/ARCHITECTURE.md"
+Source = "https://github.com/pico-nlu/pico-nlu"
+
+# --- Hatch ---
+[tool.hatch.version]
+path = "src/pico_nlu/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pico_nlu"]
+
+# --- Ruff ---
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+# --- Mypy ---
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/pico_nlu"]
+
+# torch ships no inline types; neural/ is type-checked loosely.
+[[tool.mypy.overrides]]
+module = "pico_nlu.neural.*"
+ignore_errors = true
+
+# --- Pytest ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "neural: tests requiring the [neural] extra (torch)",
+]
