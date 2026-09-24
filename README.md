@@ -1,4 +1,7 @@
 # pico-nlu
+<p align="center">
+  <img src="pico-nlu.jpg" alt="Logo" width="300">
+</p>
 
 `pico-nlu` is a from-scratch Natural Language Understanding library derived from
 [Snips NLU](https://github.com/snipsco/snips-nlu), with simplifications and modernizations:
